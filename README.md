@@ -368,13 +368,6 @@ docker run --rm -p 8000:8000 gridwise-api:latest
 
 ---
 
-## Team — GridWise
-
-Built by students who care about clean engineering, strong testing, and the kind of math that doesn’t lie.
-
-> *“Win the hackathon by doing the boring things brilliantly.”*
-
----
 
 ## License
 
