@@ -1,10 +1,5 @@
 # GridWise — Smart Campus Energy Optimization Engine
 
-> **BUP CSE Fest 2026 Hackathon · GridWise LLM Preliminary Round**
-> Built by **Team GridWise** · University of Dhaka-affiliated BUP students
-
-
-
 A deployed HTTP API service that interprets **1–3 free-text operator notes**, validates them through **deterministic guardrails**, and produces the **provably optimal, cost-minimized hourly energy dispatch** for a 24-hour campus microgrid using **Linear Programming**.
 
 > “By combining natural-language understanding with a provably optimal linear program and an independent replay-verification safety net, GridWise delivers a bulletproof solution — robust against both numerical edge cases and linguistic variation.”
