@@ -286,28 +286,28 @@ Solved with **Coin-OR CBC** (`pulp.PULP_CBC_CMD(msg=False)`) in 30–110 ms.
 BupHackathon/
 ├── app/
 │   ├── __init__.py
-│   ├── main.py              # FastAPI endpoints + sanitized error handlers
-│   ├── schemas.py           # Pydantic v2 request/response models
-│   ├── guardrails.py        # Section 08 validation & normalization
-│   ├── llm_interpreter.py   # Gemini / OpenAI / NLP fallback parser
-│   ├── optimizer.py         # PuLP LP with Coin-OR CBC
-│   └── replay_checker.py    # Independent hour-by-hour verification
+│   ├── main.py              
+│   ├── schemas.py          
+│   ├── guardrails.py        
+│   ├── llm_interpreter.py  
+│   ├── optimizer.py        
+│   └── replay_checker.py   
 │
 ├── scripts/
-│   ├── test_all_samples.py  # 10 public-sample runner
-│   ├── stress_hidden.py     # 45 hidden-case stress suite
-│   └── video_script.md      # 3-minute presentation script
+│   ├── test_all_samples.py  
+│   ├── stress_hidden.py     
+│   └── video_script.md      
 │
-├── stress_failures/         # auto-created JSON dumps of failed tests
+├── stress_failures/        
 │   └── .gitkeep
 │
 ├── BUP_CSE_FEST_2026_Preli_Public_Sample_Cases.json
-├── Dockerfile               # production build with bundled CBC
+├── Dockerfile               
 ├── docker-compose.yml
 ├── requirements.txt
-├── .env.example             # documentation only — never commit secrets
+├── .env.example            
 ├── .gitignore
-└── README.md                # you are here
+└── README.md                
 ```
 
 ---
@@ -329,14 +329,10 @@ BupHackathon/
 
 ## Deployment
 
-### Render.com (recommended for a public URL)
+### Render.com-- https://buphackathon.onrender.com/
 
-1. Push this repository to GitHub.
-2. New → **Web Service** → connect the repo.
-3. Render auto-detects the `Dockerfile`.
-4. After deploy, your endpoint will be `https://<service-name>.onrender.com`.
-5. Smoke-test: `curl https://<service-name>.onrender.com/health`.
-
+For the endpoints:
+https://buphackathon.onrender.com/docs
 ### Local Docker
 
 ```bash
