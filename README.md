@@ -3,12 +3,7 @@
 > **BUP CSE Fest 2026 Hackathon · GridWise LLM Preliminary Round**
 > Built by **Team GridWise** · University of Dhaka-affiliated BUP students
 
-[![Hackathon](https://img.shields.io/badge/BUP%20CSE%20Fest-2026%20Hackathon-blue.svg)](#)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-brightgreen.svg)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-Production%20Ready-009688.svg)](https://fastapi.tiangolo.com)
-[![PuLP](https://img.shields.io/badge/Solver-PuLP%20%2B%20CBC-orange.svg)](https://github.com/coin-or/pulp)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
-[![Tests](https://img.shields.io/badge/Tests-55%2F55%20passing-success.svg)](#)
+
 
 A deployed HTTP API service that interprets **1–3 free-text operator notes**, validates them through **deterministic guardrails**, and produces the **provably optimal, cost-minimized hourly energy dispatch** for a 24-hour campus microgrid using **Linear Programming**.
 
@@ -16,64 +11,11 @@ A deployed HTTP API service that interprets **1–3 free-text operator notes**, 
 
 ---
 
-## Table of Contents
 
-- [Problem in 60 seconds](#-problem-in-60-seconds)
-- [Why this is hard](#-why-this-is-hard)
-- [Solution at a glance](#-solution-at-a-glance)
-- [Architecture — 5-stage pipeline](#-architecture--5-stage-pipeline)
-- [Test results](#-test-results)
-- [Quick start](#-quick-start-3-options)
-- [API reference](#-api-reference)
-- [Mathematical model](#-mathematical-model)
-- [Project structure](#-project-structure)
-- [Reliability & security](#-reliability--security)
-- [Deployment](#-deployment)
-- [Tech credits](#-tech-credits)
-- [Team](#-team)
-- [License](#-license)
 
 ---
 
-## Problem in 60 seconds
 
-A university microgrid has to balance — over the next 24 hours — the **demand** of every building, the **solar generation** from rooftop PVs (volatile, weather-dependent), a **battery** that can charge/discharge with strict limits, and a **time-varying grid tariff** (cheap overnight, expensive at peak).
-
-Every so often, an operations engineer drops a short note — sometimes clear, sometimes cryptic:
-
-> *“Facilities will wash the rooftop panels from noon until 2 PM. Solar will be roughly 25%.”*
-> *“Keep at least 50% of the battery reserved tonight.”*
-> *“Do not charge batteries between 14:00 and 16:00.”*
-> *“Cafeteria menu updates tomorrow.”*
-
-The system must:
-
-1. **Read** those notes (ignoring cafeterias & admin notices).
-2. **Translate** them into machine-checkable constraints.
-3. **Solve** the cheapest feasible hourly dispatch plan.
-4. **Verify** the plan is internally consistent before returning it.
-
-The 6 supported directive types are listed in the [Problem overview](#-directive-types) below.
-
----
-
-## Why this is hard
-
-| Challenge | What makes it non-trivial |
-|---|---|
-| **Linguistic variation** | Judges’ hidden test cases rephrase the same intent 20+ different ways. |
-| **Numerical safety** | Battery state-of-charge must never go negative, grid cap must never be exceeded. |
-| **Infeasibility** | Two directives can contradict each other; the API must refuse cleanly rather than emit a bad plan. |
-| **Determinism** | Public-URL judges will hit a remote endpoint; results must be reproducible. |
-
-GridWise addresses each one:
-
-- A **deterministic NLP fallback** that uses **word-boundary regex matching** — never substring matching — to avoid false positives like “discharging” triggering a “no charging” rule.
-- **Section 08 guardrails** that re-normalize any LLM output (hours sorted & clipped to `[0, 23]`, factors clamped to `[0, 1]`, etc.).
-- A **Linear Program** that catches infeasibility and returns a clean error — **not** a partially-correct plan.
-- An **independent replay verifier** that re-checks every plan hour-by-hour *after* the solver; any violation refuses the response.
-
----
 
 ## Solution at a glance
 
@@ -89,7 +31,7 @@ Free-text note            GridWise API                       Verified plan
                            5. Respond (HTTP 200)
 ```
 
-**Pipeline facts**
+**Pipeline facts
 
 - **24** decision variables (`grid[h]`, `charge[h]`, `discharge[h]`, `solar_used[h]`, `energy[h]`, `peak`)
 - **~150** constraints (energy balance ×24, battery dynamics ×24, peak cap ×24, directive-specific, end-of-day neutrality, etc.)
@@ -164,40 +106,8 @@ Free-text note            GridWise API                       Verified plan
 
 ---
 
-## Test results
 
-### 10 / 10 official public samples ✅
-
-```
-[PASS] Case 00 (SAMPLE-01) Solar cleaning + distractor        | 38365 BDT | 2692.5 kWh | peak 175
-[PASS] Case 01 (SAMPLE-02) Battery charging maintenance       | 42885 BDT | 2915 kWh   | peak 180
-[PASS] Case 02 (SAMPLE-03) Emergency reserve as percentage    | 35480 BDT | 2430 kWh   | peak 205
-[PASS] Case 03 (SAMPLE-04) No-discharge protection test       | 40495 BDT | 2645 kWh   | peak 225
-[PASS] Case 04 (SAMPLE-05) Temporary feeder grid cap          | 33950 BDT | 2430 kWh   | peak 175
-[PASS] Case 05 (SAMPLE-06) Multiple notes with distractor     | 34090 BDT | 2395 kWh   | peak 175
-[PASS] Case 06 (SAMPLE-07) Reserve plus transformer cap       | 38550 BDT | 2560 kWh   | peak 185
-[PASS] Case 07 (SAMPLE-08) Separate charge/discharge outages  | 37665 BDT | 2490 kWh   | peak 210
-[PASS] Case 08 (SAMPLE-09) Reduction wording normalization    | 34873 BDT | 2504 kWh   | peak 170
-[PASS] Case 09 (SAMPLE-10) Multi-constraint evening operation | 41620 BDT | 2715 kWh   | peak 190
-```
-
-### 45 / 45 hidden-case stress suite ✅
-
-```
-TIER 1 - parse_time_window                : 20/20 passed
-TIER 2 - directive classification         : 10/10 passed
-TIER 3 - full pipeline + replay           : 10/10 passed
-TIER 4 - adversarial edge cases           :  5/5  passed
-OVERALL                                   : 45/45 passed
-```
-
-The hidden suite covers 24-hour format, 12-hour format, mixed AM/PM, word-numerals
-(`“six”`, `“noon”`, `“midnight”`), every paraphrase family for each directive
-type, multi-note scenarios with distractors, 100 % solar reduction,
-overlapping constraints, deliberately infeasible cases (refused cleanly), and
-edge cases of the request schema.
-
-Run them yourself:
+Run all test cases:
 
 ```bash
 # Public samples (10)
