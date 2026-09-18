@@ -369,12 +369,4 @@ docker run --rm -p 8000:8000 gridwise-api:latest
 ---
 
 
-## License
 
-Released under the **MIT License** for educational use. See `LICENSE` (or include notice above) for details.
-
----
-
-<p align="center">
-  <sub>10 public samples ✓ · 45 hidden cases ✓ · End-of-day battery neutrality ✓ · Real-time parity ✓</sub>
-</p>
